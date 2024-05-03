@@ -39,6 +39,21 @@ async function gameSetup() {
         },
     });
 
+    kaboomMethods.loadSprite("level-1", "./level-1.png");
+
+    kaboomMethods.scene("level-1", () => {
+        kaboomMethods.setGravity(2100);
+        kaboomMethods.add([
+           kaboomMethods.rect(kaboomMethods.width(), kaboomMethods.height()),
+           kaboomMethods.color(kaboomMethods.Color.fromHex("#fef9e7")),
+           // cámara fija
+           kaboomMethods.fixed(),
+        ])
+    });
+    
+
+    kaboomMethods.go("level-1");
+
 }
 
 gameSetup();
