@@ -1,4 +1,4 @@
-import { makeFlameEnemy, makePlayer, setControls } from "./entities";
+import { makeBirdEnemy, makeFlameEnemy, makeGuyEnemy, makePlayer, setControls } from "./entities";
 import { kaboomMethods } from "./kaboomCtx";
 import { makeMap } from "./utils";
 
@@ -83,9 +83,24 @@ async function gameSetup() {
         // flame characters of the map
         for (const flame of level1SpawnPoints.flame) {
             makeFlameEnemy(kaboomMethods, flame.x, flame.y);
-          }
+        }
 
-    });
+        for (const guy of level1SpawnPoints.guy) {
+            makeGuyEnemy(kaboomMethods, guy.x, guy.y);
+        }
+
+        for (const bird of level1SpawnPoints.bird) {
+            const possibleSpeeds = [100, 200, 300];
+            kaboomMethods.loop(10, () => {
+              makeBirdEnemy(
+                kaboomMethods,
+                bird.x,
+                bird.y,
+                possibleSpeeds[Math.floor(Math.random() * possibleSpeeds.length)]
+              );
+            });
+          }
+        });
     kaboomMethods.go("level-1");
 }
 

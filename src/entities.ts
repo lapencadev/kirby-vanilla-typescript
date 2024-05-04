@@ -253,6 +253,7 @@ export function makeFlameEnemy(k: KaboomCtx, posX: number, posY: number) {
 
       // later we set the code for eacht state
       k.state("idle", ["idle", "jump"]),
+      { isInhalable: false},
       "enemy",
     ]);
   
@@ -302,4 +303,76 @@ export function makeInhalable(k: KaboomCtx, enemy: GameObj) {
         enemy.move(800, 0);
       }
     });
+  }
+
+  // function for creating guy enemies
+  export function makeGuyEnemy(k: KaboomCtx, posX: number, posY: number) {
+    const guy = k.add([
+      k.sprite("assets", { anim: "guyWalk" }),
+      k.scale(scale),
+      k.pos(posX * scale, posY * scale),
+      k.area({
+        shape: new k.Rect(k.vec2(2, 3.9), 12, 12),
+        collisionIgnore: ["enemy"],
+      }),
+      k.body(),
+      k.state("idle", ["idle", "left", "right"]),
+      { isInhalable: false, speed: 100 },
+      "enemy",
+    ]);
+  
+    makeInhalable(k, guy);
+  
+    guy.onStateEnter("idle", async () => {
+      await k.wait(1);
+      guy.enterState("left");
+    });
+  
+    guy.onStateEnter("left", async () => {
+      guy.flipX = false;
+      await k.wait(2);
+      guy.enterState("right");
+    });
+  
+    guy.onStateUpdate("left", () => {
+      guy.move(-guy.speed, 0);
+    });
+  
+    guy.onStateEnter("right", async () => {
+      guy.flipX = true;
+      await k.wait(2);
+      guy.enterState("left");
+    });
+  
+    guy.onStateUpdate("right", () => {
+      guy.move(guy.speed, 0);
+    });
+  
+    return guy;
+  }
+
+  // function for creating a bird
+  export function makeBirdEnemy(
+    k: KaboomCtx,
+    posX: number,
+    posY: number,
+    speed: number
+  ) {
+    const bird = k.add([
+      k.sprite("assets", { anim: "bird" }),
+      k.scale(scale),
+      k.pos(posX * scale, posY * scale),
+      k.area({
+        shape: new k.Rect(k.vec2(4, 6), 8, 10),
+        collisionIgnore: ["enemy"],
+      }),
+      k.body({ isStatic: true }),
+      k.move(k.LEFT, speed),
+      k.offscreen({ destroy: true, distance: 400 }),
+      "enemy",
+    ]);
+  
+    makeInhalable(k, bird);
+  
+    return bird;
   }
