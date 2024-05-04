@@ -1,4 +1,4 @@
-import { makePlayer } from "./entities";
+import { makePlayer, setControls } from "./entities";
 import { kaboomMethods } from "./kaboomCtx";
 import { makeMap } from "./utils";
 
@@ -68,6 +68,7 @@ async function gameSetup() {
             level1SpawnPoints.player[0].y
         );
 
+        setControls(kaboomMethods, kirb);
         // we add the character to the scene
         kaboomMethods.add(kirb);
         // logic for the camera
@@ -76,7 +77,7 @@ async function gameSetup() {
         kaboomMethods.onUpdate(() => {
             if (kirb.pos.x < level1Layout.pos.x + 432)
                 // the camera follows the player in a certain way
-                kaboomMethods.camPos(kirb.pos.x + 500, 800);
+                kaboomMethods.camPos(kirb.pos.x + 500, 870);
         });
     });
     kaboomMethods.go("level-1");

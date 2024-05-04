@@ -1,5 +1,33 @@
-import { GameObj, KaboomCtx } from "kaboom";
+import {
+    AreaComp,
+    BodyComp,
+    DoubleJumpComp,
+    GameObj,
+    HealthComp,
+    KaboomCtx,
+    OpacityComp,
+    PosComp,
+    ScaleComp,
+    SpriteComp,
+} from "kaboom";
 import { scale } from "./constants";
+
+// necessary components for the game object type
+type PlayerGameObj = GameObj<
+    SpriteComp &
+    AreaComp &
+    BodyComp &
+    PosComp &
+    ScaleComp &
+    DoubleJumpComp &
+    HealthComp &
+    OpacityComp & {
+        speed: number;
+        direction: string;
+        isInhaling: boolean;
+        isFull: boolean;
+    }
+>;
 
 // function responsible for the game player
 export function makePlayer(k: KaboomCtx, posX: number, posY: number) {
@@ -115,4 +143,95 @@ export function makePlayer(k: KaboomCtx, posX: number, posY: number) {
     });
 
     return player;
+}
+
+// function responsible for the actions of the player
+export function setControls(k: KaboomCtx, player: PlayerGameObj) {
+    // reference to inhale effect, index for expecting just one
+    const inhaleEffectRef = k.get("inhaleEffect")[0];
+
+    // movement when pressing  a key and holds it on
+    k.onKeyDown((key) => {
+        switch (key) {
+            case "left":
+                player.direction = "left";
+                player.flipX = true;
+                player.move(-player.speed, 0);
+                break;
+            case "right":
+                player.direction = "right";
+                player.flipX = false;
+                player.move(player.speed, 0);
+                break;
+            case "z":
+                if (player.isFull) {
+                    player.play("kirbFull");
+                    inhaleEffectRef.opacity = 0;
+                    break;
+                }
+
+                player.isInhaling = true;
+                player.play("kirbInhaling");
+                inhaleEffectRef.opacity = 1;
+                break;
+            default:
+        }
+    });
+
+    // movement just pressing a key
+    k.onKeyPress((key) => {
+        switch (key) {
+            case "x":
+                player.doubleJump();
+                break;
+            default:
+        }
+    });
+
+    // action when we release the key pressed
+    k.onKeyRelease((key) => {
+        switch (key) {
+            case "z":
+                if (player.isFull) {
+                    player.play("kirbInhaling");
+                    const shootingStar = k.add([
+                        k.sprite("assets", {
+                            anim: "shootingStar",
+                            flipX: player.direction === "right",
+                        }),
+                        // rectangle with axes
+                        k.area({ shape: new k.Rect(k.vec2(5, 4), 6, 6) }),
+                        k.pos(
+                            player.direction === "left"
+                                ? player.pos.x - 80
+                                : player.pos.x + 80,
+                            player.pos.y + 5
+                        ),
+                        k.scale(scale),
+                        // to move the sprite
+                        // left and right constants provided by Kaboom
+                        player.direction === "left"
+                            ? k.move(k.LEFT, 800)
+                            : k.move(k.RIGHT, 800),
+                        "shootingStar",
+                    ]);
+
+                    // on collide event listener
+                    // if it's collide with a platform just destroy it
+                    shootingStar.onCollide("platform", () => k.destroy(shootingStar));
+
+                    player.isFull = false;
+                    // wait one second before making the player changing into kirbIdle anim
+                    k.wait(1, () => player.play("kirbIdle"));
+                    break;
+                }
+
+                // no longer inhaling anything
+                inhaleEffectRef.opacity = 0;
+                player.isInhaling = false;
+                player.play("kirbIdle");
+                break;
+            default:
+        }
+    });
 }
