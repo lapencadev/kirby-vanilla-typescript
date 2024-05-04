@@ -1,4 +1,4 @@
-import { makePlayer, setControls } from "./entities";
+import { makeFlameEnemy, makePlayer, setControls } from "./entities";
 import { kaboomMethods } from "./kaboomCtx";
 import { makeMap } from "./utils";
 
@@ -79,6 +79,12 @@ async function gameSetup() {
                 // the camera follows the player in a certain way
                 kaboomMethods.camPos(kirb.pos.x + 500, 870);
         });
+
+        // flame characters of the map
+        for (const flame of level1SpawnPoints.flame) {
+            makeFlameEnemy(kaboomMethods, flame.x, flame.y);
+          }
+
     });
     kaboomMethods.go("level-1");
 }
