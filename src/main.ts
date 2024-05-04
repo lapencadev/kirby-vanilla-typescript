@@ -1,10 +1,11 @@
+import { makePlayer } from "./entities";
 import { kaboomMethods } from "./kaboomCtx";
 import { makeMap } from "./utils";
 
 async function gameSetup() {
     kaboomMethods.loadSprite("assets", "./kirby-like.png", {
-// La numeración corresponde a los ejes de la imagen que se dividen en 9 de ancho x 10 de largo
-// Cada número corresponde a la celda de la imagen siendo 0 correspondiente al primer monigote
+        // La numeración corresponde a los ejes de la imagen que se dividen en 9 de ancho x 10 de largo
+        // Cada número corresponde a la celda de la imagen siendo 0 correspondiente al primer monigote
         sliceX: 9,
         sliceY: 10,
         anims: {
@@ -45,23 +46,40 @@ async function gameSetup() {
     const { map: level1Layout, spawnPoints: level1SpawnPoints } = await makeMap(
         kaboomMethods,
         "level-1"
-      );
+    );
     kaboomMethods.scene("level-1", () => {
         kaboomMethods.setGravity(2100);
         kaboomMethods.add([
-           kaboomMethods.rect(kaboomMethods.width(), kaboomMethods.height()),
-           kaboomMethods.color(kaboomMethods.Color.fromHex("#fef9e7")),
-           // cámara fija
-           kaboomMethods.fixed(),
+            kaboomMethods.rect(kaboomMethods.width(), kaboomMethods.height()),
+            // background colour the the scene
+            kaboomMethods.color(kaboomMethods.Color.fromHex("#cdfafe")),
+            // this is for fixing the camera view
+            kaboomMethods.fixed(),
         ]);
 
-        // volcamos el mapa para mostrarlo en pantalla
+        // we add the map in order we can see it on the screen
         kaboomMethods.add(level1Layout);
+
+        // we create the instance of the player
+        const kirb = makePlayer(
+            // if we know that there is one player we indicate the position of the array
+            kaboomMethods,
+            level1SpawnPoints.player[0].x,
+            level1SpawnPoints.player[0].y
+        );
+
+        // we add the character to the scene
+        kaboomMethods.add(kirb);
+        // logic for the camera
+        kaboomMethods.camScale(kaboomMethods.vec2(0.7));
+        // event that runs every frame
+        kaboomMethods.onUpdate(() => {
+            if (kirb.pos.x < level1Layout.pos.x + 432)
+                // the camera follows the player in a certain way
+                kaboomMethods.camPos(kirb.pos.x + 500, 800);
+        });
     });
-    
-
     kaboomMethods.go("level-1");
-
 }
 
 gameSetup();
