@@ -1,4 +1,5 @@
 import { kaboomMethods } from "./kaboomCtx";
+import { makeMap } from "./utils";
 
 async function gameSetup() {
     kaboomMethods.loadSprite("assets", "./kirby-like.png", {
@@ -41,6 +42,10 @@ async function gameSetup() {
 
     kaboomMethods.loadSprite("level-1", "./level-1.png");
 
+    const { map: level1Layout, spawnPoints: level1SpawnPoints } = await makeMap(
+        kaboomMethods,
+        "level-1"
+      );
     kaboomMethods.scene("level-1", () => {
         kaboomMethods.setGravity(2100);
         kaboomMethods.add([
@@ -48,7 +53,10 @@ async function gameSetup() {
            kaboomMethods.color(kaboomMethods.Color.fromHex("#fef9e7")),
            // cámara fija
            kaboomMethods.fixed(),
-        ])
+        ]);
+
+        // volcamos el mapa para mostrarlo en pantalla
+        kaboomMethods.add(level1Layout);
     });
     
 
